@@ -33,8 +33,7 @@ export default function AboutPage() {
       </p>
       <p>
         You can also find me on{" "}
-        <a href="https://linkedin.com/in/avinashpapineni">LinkedIn</a> and{" "}
-        <a href="https://github.com/apapineni">GitHub</a>.
+        <a href="https://linkedin.com/in/avinash-papineni">LinkedIn</a>.
       </p>
     </div>
   );
