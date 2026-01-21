@@ -1,0 +1,143 @@
+---
+title: "The Hidden Costs of LLM API Calls"
+date: "2026-01-20"
+description: "Most teams underestimate their LLM costs by 40-60%. Here's what nobody tells you about the true cost of running LLMs in production."
+published: true
+---
+
+Most teams calculate their LLM costs with a simple formula: tokens × price. The reality is far more complex. After working with production AI systems, I've seen teams consistently underestimate their actual costs by 40-60%.
+
+Here's what nobody tells you.
+
+## The Obvious Costs
+
+Everyone knows about the basic pricing model:
+
+- **Input tokens**: What you send to the model
+- **Output tokens**: What the model generates back
+- **Model pricing tiers**: GPT-4o costs more than GPT-4o-mini, Claude Opus more than Haiku
+
+A quick calculation might look like this: 1,000 requests/day × 2,000 tokens average × $0.01/1K tokens = $20/day. Simple, right?
+
+Not quite.
+
+## The Hidden Costs
+
+### 1. Retries
+
+When a request fails mid-generation, you've already consumed tokens for the partial response. The provider charged you. Then you retry, consuming more tokens for the same logical operation.
+
+A 5% error rate with one retry each means you're paying for 105% of your "successful" token usage. But errors often cluster during high load or provider issues, so your actual overhead can spike to 15-20% during incidents.
+
+### 2. Timeouts
+
+Your application has a timeout—say, 30 seconds. The LLM is generating a long response. At 29 seconds, you've received 80% of the response, then your client gives up.
+
+You paid for those tokens. You can't use them. The user sees an error.
+
+Worse, you probably retry, paying again for a complete response.
+
+### 3. Prompt Bloat
+
+Every request includes your system prompt. That carefully crafted 500-token system prompt? It's sent with every single request.
+
+10,000 requests/day × 500 system prompt tokens = 5 million input tokens just for instructions that never change. At GPT-4o pricing ($2.50/1M input tokens), that's $12.50/day—just for repeating yourself.
+
+### 4. Context Window Waste
+
+"Just send the whole conversation history" is a common pattern. But do you need all 50 previous messages to answer "What's the weather?"
+
+Teams often send 3-5x more context than necessary because:
+- It's easier than figuring out what's relevant
+- "The model might need it"
+- Retrieval systems return too many chunks
+
+Every unnecessary token costs money.
+
+### 5. Rate Limit Backoff
+
+When you hit rate limits, requests queue up. While waiting:
+- Users experience latency
+- Your infrastructure holds connections open
+- Retries consume resources
+
+The direct cost isn't token-based, but the indirect cost is real: delayed responses mean delayed value delivery, potential user churn, and wasted compute on your side.
+
+## The Real Math
+
+Let's calculate a realistic scenario for a customer support chatbot:
+
+**Naive calculation:**
+- 10,000 conversations/day
+- Average 3 exchanges per conversation
+- 1,500 tokens per exchange (prompt + response)
+- Using GPT-4o ($2.50/1M input, $10/1M output)
+- Assuming 60% input, 40% output tokens
+
+Monthly cost: ~$1,350
+
+**Reality:**
+- 7% of requests fail and retry: +7%
+- 3% timeout with partial responses: +3%
+- System prompt overhead (500 tokens × 30,000 requests): +15%
+- Context bloat (sending 2x necessary history): +25%
+- Rate limit incidents (4 per month, 2 hours each): +2%
+
+Adjusted monthly cost: ~$2,050
+
+**That's 52% more than the naive estimate.**
+
+## Mitigation Strategies
+
+### Implement Caching
+
+**Exact-match caching** catches identical requests. Simple to implement, typically 5-15% hit rate.
+
+**Semantic caching** uses embeddings to catch similar requests. More complex, but can achieve 30-40% hit rates for repetitive workloads like customer support.
+
+Start with exact-match. It's free wins.
+
+### Optimize Prompts
+
+- Compress system prompts without losing effectiveness
+- Use references instead of repeating instructions
+- Test shorter prompts—models are often smarter than we give them credit for
+
+A 20% reduction in prompt size is a 20% reduction in input costs.
+
+### Smart Retry Logic
+
+- Set sensible timeouts based on expected response length
+- Use exponential backoff with jitter
+- Consider streaming to detect stalls early
+- Track partial response costs separately
+
+### Manage Context Intelligently
+
+- Summarize old conversation turns instead of including verbatim
+- Implement relevance scoring for retrieval chunks
+- Set hard limits on context size with graceful degradation
+
+### Monitor What Matters
+
+Track these metrics:
+- **Cost per successful request** (not just total cost)
+- **Retry rate** and **retry cost**
+- **Timeout rate** and **wasted tokens**
+- **Cache hit rate**
+- **Average context size** vs **necessary context size**
+
+You can't optimize what you don't measure.
+
+## Conclusion
+
+Understanding the true cost of LLM APIs requires looking beyond the pricing page. The gap between expected and actual costs isn't a bug—it's a feature of production systems dealing with real-world complexity.
+
+The teams that get this right treat cost awareness as operational maturity, not an afterthought. They build observability from day one, implement caching early, and continuously measure the gap between theoretical and actual spend.
+
+**Key takeaways:**
+- Budget 1.5-2x your naive token calculations
+- Implement caching before you think you need it
+- Monitor cost per successful request, not just total spend
+
+The hidden costs are only hidden if you're not looking for them.

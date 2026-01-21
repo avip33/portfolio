@@ -1,0 +1,49 @@
+---
+title: "Hello World"
+date: "2026-01-20"
+description: "A first post to test the writing setup."
+published: false
+---
+
+This is a sample post to demonstrate the MDX setup. You can delete this file once you start writing your own content.
+
+## How to Write Posts
+
+Create a new `.mdx` file in the `content/writing` directory with the following frontmatter:
+
+```yaml
+---
+title: "Your Post Title"
+date: "2026-01-20"
+description: "A brief description for SEO and previews"
+published: true
+---
+```
+
+## MDX Features
+
+You can use all standard Markdown features:
+
+- **Bold text** and *italic text*
+- [Links](https://example.com)
+- Lists and numbered lists
+- Code blocks with syntax highlighting
+
+### Code Examples
+
+```typescript
+const greeting = "Hello, World!";
+console.log(greeting);
+```
+
+### Custom Components
+
+You can also use React components directly in your MDX files. For example, the `Callout` component:
+
+<Callout type="info">
+  This is an info callout. Great for tips and notes.
+</Callout>
+
+### Adding More Components
+
+To add more components (like ReactFlow, charts, etc.), edit the `src/lib/mdx.tsx` file and add them to the `components` object.
