@@ -13,7 +13,7 @@ export default function Home() {
           <br />
           I write about AI infrastructure, focusing on cost control, reliability, and governance as LLMs move into production.
         </p>
-        <p className="mt-4 text-[15px] text-muted leading-relaxed">
+        <p className="mt-4 text-[15px] text-muted-foreground leading-relaxed">
           Currently at Mastercard, building enterprise-scale systems.
         </p>
       </section>
@@ -21,7 +21,7 @@ export default function Home() {
       {/* Recent Writing */}
       {posts.length > 0 && (
         <section>
-          <h2 className="text-sm font-medium text-muted mb-6">Recent Writing</h2>
+          <h2 className="text-sm font-medium text-muted-foreground mb-6">Recent Writing</h2>
           <ul className="space-y-4">
             {posts.map((post) => (
               <li key={post.slug}>
@@ -30,7 +30,7 @@ export default function Home() {
                   className="group flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1"
                 >
                   <span className="group-hover:underline">{post.title}</span>
-                  <span className="text-sm text-muted shrink-0">
+                  <span className="text-sm text-muted-foreground shrink-0">
                     {formatDate(post.date)}
                   </span>
                 </Link>
@@ -39,7 +39,7 @@ export default function Home() {
           </ul>
           <Link
             href="/writing"
-            className="inline-block mt-6 text-sm text-muted hover:text-foreground"
+            className="inline-block mt-6 text-sm text-muted-foreground hover:text-foreground"
           >
             View all posts →
           </Link>
@@ -49,8 +49,8 @@ export default function Home() {
       {/* Empty state if no posts */}
       {posts.length === 0 && (
         <section>
-          <h2 className="text-sm font-medium text-muted mb-4">Writing</h2>
-          <p className="text-muted">
+          <h2 className="text-sm font-medium text-muted-foreground mb-4">Writing</h2>
+          <p className="text-muted-foreground">
             Articles coming soon. Check back later.
           </p>
         </section>

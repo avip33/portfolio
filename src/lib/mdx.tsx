@@ -1,10 +1,11 @@
 import { MDXRemote } from "next-mdx-remote/rsc";
 import type { MDXComponents } from "mdx/types";
+import { CostBreakdownChart, ComparisonBarChart, CostTable } from "@/components/charts";
+import { CodeBlock } from "@/components/code-block";
 
 // Custom components that can be used in MDX files
-// Add your React components here (e.g., ReactFlow, Charts, etc.)
 const components: MDXComponents = {
-  // Example: Custom callout component
+  // Callout component for tips, warnings, etc.
   Callout: ({ children, type = "info" }: { children: React.ReactNode; type?: "info" | "warning" | "error" }) => {
     const styles = {
       info: "bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800",
@@ -17,9 +18,12 @@ const components: MDXComponents = {
       </div>
     );
   },
-  // Add more custom components as needed
-  // ReactFlow: dynamic(() => import('reactflow'), { ssr: false }),
-  // Chart: YourChartComponent,
+  // Chart components
+  CostBreakdownChart,
+  ComparisonBarChart,
+  CostTable,
+  // Code block with syntax highlighting
+  CodeBlock,
 };
 
 interface MDXContentProps {

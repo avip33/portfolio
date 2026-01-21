@@ -13,7 +13,7 @@ export default function WritingPage() {
   return (
     <div>
       <h1 className="text-lg font-semibold tracking-tight mb-2">Writing</h1>
-      <p className="text-muted mb-12">
+      <p className="text-muted-foreground mb-12">
         Thoughts on AI infrastructure, LLM operations, and building reliable systems.
       </p>
 
@@ -29,12 +29,12 @@ export default function WritingPage() {
                   <span className="font-medium group-hover:underline">
                     {post.title}
                   </span>
-                  <span className="text-sm text-muted shrink-0">
+                  <span className="text-sm text-muted-foreground shrink-0">
                     {formatDate(post.date)}
                   </span>
                 </div>
                 {post.description && (
-                  <p className="mt-1 text-sm text-muted line-clamp-2">
+                  <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
                     {post.description}
                   </p>
                 )}
@@ -43,7 +43,7 @@ export default function WritingPage() {
           ))}
         </ul>
       ) : (
-        <p className="text-muted">
+        <p className="text-muted-foreground">
           Articles coming soon. Check back later.
         </p>
       )}

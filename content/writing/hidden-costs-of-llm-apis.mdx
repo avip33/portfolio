@@ -9,15 +9,35 @@ Most teams calculate their LLM costs with a simple formula: tokens × price. The
 
 Here's what nobody tells you.
 
-## The Obvious Costs
+## Current LLM Pricing (January 2026)
 
-Everyone knows about the basic pricing model:
+Before diving into hidden costs, let's establish the baseline. Here's what the major providers charge:
 
-- **Input tokens**: What you send to the model
-- **Output tokens**: What the model generates back
-- **Model pricing tiers**: GPT-4o costs more than GPT-4o-mini, Claude Opus more than Haiku
+<CostTable
+  title="OpenAI Pricing"
+  headers={["Model", "Input (per 1M)", "Output (per 1M)", "Context"]}
+  rows={[
+    { item: "GPT-4o", tokens: "$2.50", rate: "$10.00", cost: "128K" },
+    { item: "GPT-4o mini", tokens: "$0.15", rate: "$0.60", cost: "128K" },
+    { item: "GPT-4 Turbo", tokens: "$10.00", rate: "$30.00", cost: "128K" },
+    { item: "o1", tokens: "$15.00", rate: "$60.00", cost: "200K" },
+    { item: "o1-mini", tokens: "$3.00", rate: "$12.00", cost: "128K" },
+  ]}
+  footnote="Source: OpenAI pricing page, January 2026"
+/>
 
-A quick calculation might look like this: 1,000 requests/day × 2,000 tokens average × $0.01/1K tokens = $20/day. Simple, right?
+<CostTable
+  title="Anthropic Pricing"
+  headers={["Model", "Input (per 1M)", "Output (per 1M)", "Context"]}
+  rows={[
+    { item: "Claude 3.5 Sonnet", tokens: "$3.00", rate: "$15.00", cost: "200K" },
+    { item: "Claude 3.5 Haiku", tokens: "$0.80", rate: "$4.00", cost: "200K" },
+    { item: "Claude 3 Opus", tokens: "$15.00", rate: "$75.00", cost: "200K" },
+  ]}
+  footnote="Source: Anthropic pricing page, January 2026"
+/>
+
+A quick calculation might look like this: 1,000 requests/day × 2,000 tokens average × $2.50/1M tokens = $5/day. Simple, right?
 
 Not quite.
 
@@ -27,7 +47,9 @@ Not quite.
 
 When a request fails mid-generation, you've already consumed tokens for the partial response. The provider charged you. Then you retry, consuming more tokens for the same logical operation.
 
+<Callout type="warning">
 A 5% error rate with one retry each means you're paying for 105% of your "successful" token usage. But errors often cluster during high load or provider issues, so your actual overhead can spike to 15-20% during incidents.
+</Callout>
 
 ### 2. Timeouts
 
@@ -41,7 +63,18 @@ Worse, you probably retry, paying again for a complete response.
 
 Every request includes your system prompt. That carefully crafted 500-token system prompt? It's sent with every single request.
 
-10,000 requests/day × 500 system prompt tokens = 5 million input tokens just for instructions that never change. At GPT-4o pricing ($2.50/1M input tokens), that's $12.50/day—just for repeating yourself.
+<CostTable
+  title="System Prompt Overhead Example"
+  headers={["Item", "Calculation", "Daily Cost"]}
+  rows={[
+    { item: "Requests per day", tokens: "10,000", cost: "—" },
+    { item: "System prompt tokens", tokens: "500", cost: "—" },
+    { item: "Total prompt tokens", tokens: "5,000,000", cost: "—" },
+    { item: "GPT-4o input rate", tokens: "$2.50/1M", cost: "$12.50" },
+    { item: "GPT-4o mini input rate", tokens: "$0.15/1M", cost: "$0.75" },
+  ]}
+  footnote="Just for repeating instructions that never change"
+/>
 
 ### 4. Context Window Waste
 
@@ -63,41 +96,109 @@ When you hit rate limits, requests queue up. While waiting:
 
 The direct cost isn't token-based, but the indirect cost is real: delayed responses mean delayed value delivery, potential user churn, and wasted compute on your side.
 
-## The Real Math
+## The Real Math: A Customer Support Chatbot
 
-Let's calculate a realistic scenario for a customer support chatbot:
+Let's calculate a realistic scenario. A mid-sized SaaS company runs a customer support chatbot using GPT-4o.
 
-**Naive calculation:**
-- 10,000 conversations/day
-- Average 3 exchanges per conversation
-- 1,500 tokens per exchange (prompt + response)
-- Using GPT-4o ($2.50/1M input, $10/1M output)
-- Assuming 60% input, 40% output tokens
+### Naive Calculation
 
-Monthly cost: ~$1,350
+<CostTable
+  title="Expected Monthly Cost"
+  headers={["Item", "Value", "Cost"]}
+  rows={[
+    { item: "Conversations per day", tokens: "10,000", cost: "—" },
+    { item: "Exchanges per conversation", tokens: "3", cost: "—" },
+    { item: "Daily requests", tokens: "30,000", cost: "—" },
+    { item: "Avg tokens per request", tokens: "1,500", cost: "—" },
+    { item: "Monthly tokens", tokens: "1.35B", cost: "—" },
+    { item: "Input tokens (60%)", tokens: "810M", cost: "$2,025" },
+    { item: "Output tokens (40%)", tokens: "540M", cost: "$5,400" },
+  ]}
+  total="$7,425/mo"
+  footnote="Based on GPT-4o pricing: $2.50/1M input, $10.00/1M output"
+/>
 
-**Reality:**
-- 7% of requests fail and retry: +7%
-- 3% timeout with partial responses: +3%
-- System prompt overhead (500 tokens × 30,000 requests): +15%
-- Context bloat (sending 2x necessary history): +25%
-- Rate limit incidents (4 per month, 2 hours each): +2%
+### Reality: Adding Hidden Costs
 
-Adjusted monthly cost: ~$2,050
+<CostTable
+  title="Actual Monthly Cost Breakdown"
+  headers={["Cost Category", "Impact", "Additional Cost"]}
+  rows={[
+    { item: "Base cost (from above)", tokens: "—", cost: "$7,425" },
+    { item: "Retries (7% fail rate)", tokens: "+7%", cost: "$520" },
+    { item: "Timeouts (3% partial)", tokens: "+3%", cost: "$223" },
+    { item: "System prompt overhead", tokens: "+15%", cost: "$1,114" },
+    { item: "Context bloat (2x necessary)", tokens: "+25%", cost: "$1,856" },
+    { item: "Rate limit incidents", tokens: "+2%", cost: "$149" },
+  ]}
+  total="$11,287/mo"
+  footnote="52% higher than naive estimate"
+/>
 
-**That's 52% more than the naive estimate.**
+<ComparisonBarChart
+  title="Naive vs Actual Monthly Cost"
+  data={[
+    { name: "Customer Support Bot", naive: 7425, actual: 11287 },
+  ]}
+/>
+
+<CostBreakdownChart
+  title="Where the Extra Cost Goes"
+  data={[
+    { name: "Base Cost", value: 7425 },
+    { name: "Retries", value: 520 },
+    { name: "Timeouts", value: 223 },
+    { name: "Prompt Overhead", value: 1114 },
+    { name: "Context Bloat", value: 1856 },
+    { name: "Rate Limits", value: 149 },
+  ]}
+/>
+
+**That's $3,862 per month in hidden costs—52% more than expected.**
+
+Over a year, this adds up to **$46,344 in unexpected spend**.
+
+## Model Selection Impact
+
+The model you choose dramatically affects how much hidden costs hurt. Here's the same workload across different models:
+
+<CostTable
+  title="Annual Cost Comparison by Model"
+  headers={["Model", "Naive Annual", "Actual Annual", "Hidden Cost"]}
+  rows={[
+    { item: "GPT-4o", tokens: "$89,100", rate: "$135,444", cost: "$46,344" },
+    { item: "GPT-4o mini", tokens: "$5,346", rate: "$8,126", cost: "$2,780" },
+    { item: "Claude 3.5 Sonnet", tokens: "$106,920", rate: "$162,519", cost: "$55,599" },
+    { item: "Claude 3.5 Haiku", tokens: "$28,512", rate: "$43,338", cost: "$14,826" },
+  ]}
+  footnote="Same workload: 10K conversations/day, 3 exchanges each, 1,500 tokens/exchange"
+/>
+
+<Callout type="info">
+Smaller, faster models like GPT-4o mini and Claude Haiku have lower absolute hidden costs—but the percentage overhead remains similar. The hidden cost multiplier is workload-dependent, not model-dependent.
+</Callout>
 
 ## Mitigation Strategies
 
-### Implement Caching
+### 1. Implement Caching
 
 **Exact-match caching** catches identical requests. Simple to implement, typically 5-15% hit rate.
 
 **Semantic caching** uses embeddings to catch similar requests. More complex, but can achieve 30-40% hit rates for repetitive workloads like customer support.
 
+<CostTable
+  title="Caching Impact on Annual Costs (GPT-4o)"
+  headers={["Strategy", "Hit Rate", "Annual Cost", "Savings"]}
+  rows={[
+    { item: "No caching", tokens: "0%", rate: "$135,444", cost: "—" },
+    { item: "Exact-match", tokens: "10%", rate: "$121,900", cost: "$13,544" },
+    { item: "Semantic caching", tokens: "35%", rate: "$88,039", cost: "$47,405" },
+  ]}
+/>
+
 Start with exact-match. It's free wins.
 
-### Optimize Prompts
+### 2. Optimize Prompts
 
 - Compress system prompts without losing effectiveness
 - Use references instead of repeating instructions
@@ -105,20 +206,20 @@ Start with exact-match. It's free wins.
 
 A 20% reduction in prompt size is a 20% reduction in input costs.
 
-### Smart Retry Logic
+### 3. Smart Retry Logic
 
 - Set sensible timeouts based on expected response length
 - Use exponential backoff with jitter
 - Consider streaming to detect stalls early
 - Track partial response costs separately
 
-### Manage Context Intelligently
+### 4. Manage Context Intelligently
 
 - Summarize old conversation turns instead of including verbatim
 - Implement relevance scoring for retrieval chunks
 - Set hard limits on context size with graceful degradation
 
-### Monitor What Matters
+### 5. Monitor What Matters
 
 Track these metrics:
 - **Cost per successful request** (not just total cost)

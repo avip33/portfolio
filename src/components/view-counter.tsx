@@ -37,11 +37,11 @@ export function ViewCounter({ slug, trackView = false }: ViewCounterProps) {
   }, [slug, trackView]);
 
   if (views === null) {
-    return <span className="text-muted">–</span>;
+    return <span className="text-muted-foreground">–</span>;
   }
 
   return (
-    <span className="text-muted">
+    <span className="text-muted-foreground">
       {views.toLocaleString()} {views === 1 ? "view" : "views"}
     </span>
   );

@@ -50,14 +50,14 @@ export default async function PostPage({ params }: PageProps) {
       <header className="mb-10">
         <Link
           href="/writing"
-          className="text-sm text-muted hover:text-foreground mb-4 inline-block"
+          className="text-sm text-muted-foreground hover:text-foreground mb-4 inline-block"
         >
           ← Back to writing
         </Link>
         <h1 className="text-lg font-semibold tracking-tight mb-2">{post.title}</h1>
         <div className="flex items-center gap-3 text-sm">
-          <time className="text-muted">{formatDate(post.date)}</time>
-          <span className="text-muted">·</span>
+          <time className="text-muted-foreground">{formatDate(post.date)}</time>
+          <span className="text-muted-foreground">·</span>
           <ViewCounter slug={slug} trackView />
         </div>
       </header>
