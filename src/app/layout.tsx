@@ -20,12 +20,12 @@ export const metadata: Metadata = {
     template: "%s | Avinash Papineni",
   },
   description:
-    "Systems architect and founder focused on AI infrastructure — helping teams control cost, reliability, and governance as LLMs move into production.",
+    "Systems architect intrested in AI infrastructure — helping teams control cost, reliability, and governance as LLMs move into production.",
   metadataBase: new URL("https://avinashpapineni.com"),
   openGraph: {
     title: "Avinash Papineni",
     description:
-      "Systems architect and founder focused on AI infrastructure.",
+      "Systems architect intrested in AI infrastructure.",
     url: "https://avinashpapineni.com",
     siteName: "Avinash Papineni",
     locale: "en_US",
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Avinash Papineni",
     description:
-      "Systems architect and founder focused on AI infrastructure.",
+      "Systems architect intrested in AI infrastructure.",
   },
   robots: {
     index: true,
